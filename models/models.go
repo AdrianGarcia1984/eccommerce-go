@@ -60,7 +60,3 @@ type Payment struct {
 	Digital bool
 	COD     bool
 }
-
-func models() {
-
-}
