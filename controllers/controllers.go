@@ -125,10 +125,10 @@ func Singup() gin.HandlerFunc {
 		user.Updated_At, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		user.ID = primitive.NewObjectID()
 		user.User_Id = user.ID.Hex()
-		token, refresToken, _ := generate.TokenGenerator(*user.Email, *user.Firt_Name, *user.Last_Name, *&user.User_Id)
-		user.Token = token
-		user.Refresh_Token = refresToken
-		user.UserCard = make([]models.ProductUser, 0)
+		token, refresToken, _ := generate.TokenGenerator(*user.Email, *user.Firt_Name, *user.Last_Name, user.User_Id)
+		user.Token = &token
+		user.Refresh_Token = &refresToken
+		user.UserCart = make([]models.ProductUser, 0)
 		user.Address_Details = make([]models.Address, 0)
 		user.Order_Status = make([]models.Order, 0)
 		_, inserterr := UserCollection.InsertOne(ctx, user)
@@ -146,7 +146,27 @@ func Singup() gin.HandlerFunc {
 }
 
 // ProductViewerAdmin
-func ProductViewerAdmin() gin.HandlerFunc
+func ProductViewerAdmin() gin.HandlerFunc{
+	return func (c *gin.Context){
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var products models.Product
+		defer cancel()
+		if err := c.Bind(&products); err != nil{
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		products.Product_Id = primitive.NewObjectID()
+		_, anyerr := ProductCollection.InsertOne(ctx, products)
+		if anyerr != nil{
+			c.JSON(http.StatusBadRequest, gin.H{"error": "not inserted"})
+			return
+		}
+		defer cancel()
+		c.JSON(http.StatusOK, "successfully added")
+
+
+	}
+}
 
 // searchProduct
 func SearchProduct() gin.HandlerFunc {

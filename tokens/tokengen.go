@@ -59,6 +59,8 @@ func TokenGenerator(email string, firstname string, lastname string, uid string)
 
 }
 
+
+
 func ValidateToken(signedtoken string) (claims *SignedDetails, msg string) {
 
 	token, err := jwt.ParseWithClaims(signedtoken, &SignedDetails{}, func(t *jwt.Token) (interface{}, error) {

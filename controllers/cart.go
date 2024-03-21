@@ -146,7 +146,7 @@ func GetItemFromCart() gin.HandlerFunc {
 		}
 		for _, json := range listing{
 			c.IndentedJSON(200,json["total"])
-			c.IndentedJSON(200, fillercart.UserCard)
+			c.IndentedJSON(200, fillercart.UserCart)
 		}
 		ctx.Done()
 
@@ -170,7 +170,7 @@ func (app Application) BuyFromCart() gin.HandlerFunc {
 	}
 }
 
-func InstantBuy() gin.HandlerFunc {
+func (app Application) InstantBuy() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		productId, userQueryId := checkUserProductId(c)
 
