@@ -72,12 +72,87 @@ func AddAddress() gin.HandlerFunc {
 	}
 }
 
-func EditHomeAddress() gin.HandlerFunc
+func EditHomeAddress() gin.HandlerFunc{
+	return func (c *gin.Context){
 
-func EditWorkAddress() gin.HandlerFunc
+		user_id := c.Query("id")
+		if user_id == "" {
+			log.Println("user_id is empty")
+			c.Header("Content-Type", "application/json")
+			c.JSON(http.StatusNotFound, gin.H{"Error": "invalid"})
+			c.Abort()
+			return
+		}
+
+		usert_id, err := primitive.ObjectIDFromHex(user_id)
+		if err != nil {
+			log.Println(err)
+			c.IndentedJSON(500, "Internal server error")
+			return
+		}
+		var editaddress models.Address
+		if err := c.BindJSON(&editaddress);err != nil{
+			c.IndentedJSON(http.StatusBadRequest, err.Error())
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+
+		filter := bson.D{primitive.E{Key: "_id", Value: usert_id}}
+		update := bson.D{{Key: "$set", Value: bson.D{primitive.E{Key: "address.0.house_name", Value: editaddress.House},  {Key: "address.0.city_name", Value: editaddress.City}, {Key: "address.0.pin_code", Value: editaddress.Pincode},{Key: "address.0.street_name", Value: editaddress.Street}}}}
+		_, err=UserCollection.UpdateOne(ctx, filter,update)
+		if err != nil{
+			c.IndentedJSON(500,"someting went wrong")
+			return
+
+		}
+		defer cancel()
+		ctx.Done()
+		c.IndentedJSON(200, "successfully update home address")
+	}
+}
+
+func EditWorkAddress() gin.HandlerFunc{
+	return func (c *gin.Context){
+		user_id := c.Query("id")
+		if user_id == "" {
+			log.Println("user_id is empty")
+			c.Header("Content-Type", "application/json")
+			c.JSON(http.StatusNotFound, gin.H{"Error": "invalid"})
+			c.Abort()
+			return
+		}
+
+		usert_id, err := primitive.ObjectIDFromHex(user_id)
+		if err != nil {
+			log.Println(err)
+			c.IndentedJSON(500, "Internal server error")
+			return
+		}
+		var editaddress models.Address
+		if err := c.BindJSON(&editaddress);err != nil{
+			c.IndentedJSON(http.StatusBadRequest, err.Error())
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+
+		filter := bson.D{primitive.E{Key: "_id", Value: usert_id}}
+
+		update := bson.D{{Key: "$set", Value: bson.D{primitive.E{Key: "address.1.house_name", Value: editaddress.House},  {Key: "address.1.city_name", Value: editaddress.City}, {Key: "address.1.pin_code", Value: editaddress.Pincode},{Key: "address.1.street_name", Value: editaddress.Street}}}}
+		_, err=UserCollection.UpdateOne(ctx, filter,update)
+		if err != nil{
+			c.IndentedJSON(500,"someting went wrong")
+			return
+
+		}
+		defer cancel()
+		ctx.Done()
+		c.IndentedJSON(200, "successfully update work address")
+	}
+}
 
 func DeleteAddress() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		
 		addresses := make([]models.Address, 0)
 		user_id := c.Query("id")
 

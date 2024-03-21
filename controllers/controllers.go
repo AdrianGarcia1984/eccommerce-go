@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/adriangarcia1984/ecommerce-go/database"
+	generate "github.com/adriangarcia1984/ecommerce-go/tokens"
 	"github.com/adriangarcia1984/ecommerce-go/models"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -97,7 +98,7 @@ func Singup() gin.HandlerFunc {
 			return
 		}
 
-		count, err := UserCollection.CountCocuments(ctx, bson.M{"email": user.Email})
+		count, err := UserCollection.CountDocuments(ctx, bson.M{"email": user.Email})
 		if err != nil {
 			log.Panic(err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err})
@@ -106,7 +107,7 @@ func Singup() gin.HandlerFunc {
 		if count > 0 {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "user already exist"})
 		}
-		count, err = UserCollection.CountCocuments(ctx, bson.M{"phone": user.Phone})
+		count, err = UserCollection.CountDocuments(ctx, bson.M{"phone": user.Phone})
 		defer cancel()
 		if err != nil {
 			log.Panic(err)
@@ -130,10 +131,10 @@ func Singup() gin.HandlerFunc {
 		user.UserCard = make([]models.ProductUser, 0)
 		user.Address_Details = make([]models.Address, 0)
 		user.Order_Status = make([]models.Order, 0)
-		_, inserterr = UserCollection.InsertOne(ctx, user)
+		_, inserterr := UserCollection.InsertOne(ctx, user)
 
 		if inserterr != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "the user didn´t created"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "the user did not created"})
 			return
 		}
 
