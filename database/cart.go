@@ -141,7 +141,7 @@ func InstantBuyer(ctx context.Context, prodCollection, userCollection *mongo.Col
 	order_details.Ordered_At = time.Now()
 	order_details.Order_Card = make([]models.ProductUser, 0)
 	order_details.Payment_Method.COD = true
-	prodCollection.FindOne(ctx, bson.D{primitive.E{Key: "_id", Value: productId}}).Decode(&product_details)
+	err = prodCollection.FindOne(ctx, bson.D{primitive.E{Key: "_id", Value: productId}}).Decode(&product_details)
 	if err != nil{
 		log.Println(err)
 	}

@@ -27,21 +27,17 @@ func NewApplication(prodCollection, userCollection *mongo.Collection) *Applicati
 	}
 }
 
-func (app *Application) AddToCard() gin.HandlerFunc {
+func (app *Application) AddToCart() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		productQueryId := c.Query("id")
 		if productQueryId == "" {
 			log.Println("product id is empty")
-
 			_ = c.AbortWithError(http.StatusBadRequest, errors.New("product id is empty"))
-
 			return
 		}
-
 		userQueryId := c.Query("userID")
 		if userQueryId == "" {
 			log.Println("user id is empty")
-
 			_ = c.AbortWithError(http.StatusBadRequest, errors.New("user id is empty"))
 			return
 		}

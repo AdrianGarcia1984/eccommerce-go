@@ -1,16 +1,19 @@
 package middleware
 
 import (
+	"log"
+	"net/http"
+
 	token "github.com/adriangarcia1984/ecommerce-go/tokens"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func Authentication() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ClientToken := c.Request.Header.Get("token")
+		ClientToken := c.Request.Header.Get("Authorization")
+		log.Println("token", ClientToken)
 		if ClientToken == "" {
-			c.JSON(http.StatusInternalServerError, gin.H{"error":"not autorization header"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error":"not autorization header, middleware"})
 			c.Abort()
 			return
 		}

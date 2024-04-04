@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"time"
-
 	"github.com/adriangarcia1984/ecommerce-go/database"
 	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/bson"
@@ -25,6 +24,7 @@ type SignedDetails struct {
 var UserData *mongo.Collection = database.UserData(database.Client, "Users")
 
 var SECRET_KEY = os.Getenv("SECRET_KEY")
+var SECRET_KEY1 = []byte("secret")
 
 func TokenGenerator(email string, firstname string, lastname string, uid string) (signedtoken string, signedrefreshtoken string, err error) {
 	claims := &SignedDetails{
@@ -34,37 +34,37 @@ func TokenGenerator(email string, firstname string, lastname string, uid string)
 		Uid:        uid,
 		RegisteredClaims: jwt.RegisteredClaims{
 			//ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(24)).Unix(),// update for v4 at v5 jwt-golang
-			ExpiresAt: jwt.NewNumericDate(time.Unix(1516239022, 0)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Local().Add(time.Hour * time.Duration(24))),
+			//ExpiresAt: jwt.NewNumericDate(time.Unix(1516239022, 0)),
 		},
 	}
 	refreshclaims := SignedDetails{
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Unix(1516239022, 0)),
+			//ExpiresAt: jwt.NewNumericDate(time.Unix(1516239022, 0)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Local().Add(time.Hour * time.Duration(24))),
 		},
 	}
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(SECRET_KEY1)
 
-	token, err := jwt.NewWithClaims(jwt.SigningMethodES256, claims).SignedString([]byte(SECRET_KEY))
 
 	if err != nil {
 		return "", "", err
 	}
 
-	refreshtoken, err := jwt.NewWithClaims(jwt.SigningMethodES256, refreshclaims).SignedString([]byte(SECRET_KEY))
+	refreshtoken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshclaims).SignedString(SECRET_KEY1)
 	if err != nil {
 		log.Panic(err)
 		return
 	}
-
+	log.Println("tokengen: ", token)
 	return token, refreshtoken, err
-
 }
-
-
 
 func ValidateToken(signedtoken string) (claims *SignedDetails, msg string) {
 
 	token, err := jwt.ParseWithClaims(signedtoken, &SignedDetails{}, func(t *jwt.Token) (interface{}, error) {
-		return []byte(SECRET_KEY), nil
+		//return []byte(SECRET_KEY), nil
+		return SECRET_KEY1, nil
 	})
 
 	if err != nil {
